@@ -38,7 +38,7 @@ data class ChatCompletionResponse(
 data class ChatCompletionRequest(
     val model: String, // recommend: "gpt-3.5-turbo"
     val messages: MutableList<ChatMessage>,
-    private val temperature: Float = 0.0f,
+    private val temperature: Float = 0.4f,
     @SerializedName("top_p") val topP: Float = 0.0f,
     val n: Int = 1,
     val stream: Boolean = false,

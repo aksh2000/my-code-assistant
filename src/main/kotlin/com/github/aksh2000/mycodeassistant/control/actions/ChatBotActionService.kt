@@ -58,8 +58,8 @@ class ChatBotActionService(private var actionType: Action) {
         prompt: PromptFormatter,
         replaceSelectedText: ((response: String) -> Unit)? = null
     ) {
-        ui.add(prompt.getUIPrompt(), true)
-        ui.add("Loading...")
+        ui.add(prompt.getUIPrompt(), true, prompt.getRequestPrompt())
+        ui.add("Loading...",false, null)
 
         ApplicationManager.getApplication().executeOnPooledThread {
             val response = this.makeChatBotRequest(prompt.getRequestPrompt())

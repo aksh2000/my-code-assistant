@@ -1,6 +1,7 @@
 package com.github.aksh2000.mycodeassistant.views
 
 import com.github.aksh2000.mycodeassistant.control.actions.Action.EXPLAIN_CODE
+import com.github.aksh2000.mycodeassistant.control.actions.Action.GENERATE_UNIT_TEST_CASES
 import com.github.aksh2000.mycodeassistant.control.actions.ChatBotActionService
 import com.intellij.openapi.ui.NullableComponent
 import com.intellij.ui.Gray
@@ -34,6 +35,7 @@ class ContentPanelComponent(private val chatBotActionService: ChatBotActionServi
     private val myTitle = JBLabel("Conversation")
     private val myList = JPanel(VerticalLayout(JBUI.scale(10)))
     private val mainPanel = JPanel(BorderLayout(0, JBUI.scale(8)))
+    private var lastPrompt = "";
     private val myScrollPane = JBScrollPane(
         myList, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
         ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER
@@ -64,7 +66,7 @@ class ContentPanelComponent(private val chatBotActionService: ChatBotActionServi
         addQuestionArea()
     }
 
-    fun add(message: String, isMe: Boolean = false) {
+    fun add(message: String, isMe: Boolean = false, requestPrompt: String?) {
         val messageComponent = MessageComponent(message, isMe)
         val jbScrollPane = JBScrollPane(
             messageComponent, ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER,
@@ -73,6 +75,9 @@ class ContentPanelComponent(private val chatBotActionService: ChatBotActionServi
 
         myList.add(jbScrollPane)
         progressBar.isIndeterminate = true
+        if (requestPrompt != null) {
+            lastPrompt = requestPrompt
+        }
         updateUI()
     }
 
@@ -121,6 +126,17 @@ class ContentPanelComponent(private val chatBotActionService: ChatBotActionServi
             })
         }
         searchTextArea.addActionListener(listener)
+
+        val refreshListener: (ActionEvent) -> Unit = {
+            val prompt = lastPrompt
+            searchTextArea.text = ""
+            chatBotActionService.setActionType(GENERATE_UNIT_TEST_CASES)
+            chatBotActionService.handlePromptAndResponse(this, object : PromptFormatter {
+                override fun getUIPrompt() = prompt
+                override fun getRequestPrompt() = prompt
+            })
+        }
+        searchTextArea.addActionListener(refreshListener)
         actionPanel.add(searchTextArea, BorderLayout.CENTER)
 
         val actionButtons = JPanel(BorderLayout())
@@ -134,9 +150,12 @@ class ContentPanelComponent(private val chatBotActionService: ChatBotActionServi
         clearChat.border = JBEmptyBorder(5, 5, 5, 5)
 
         val button = JButton("Send")
+        val refresh = JButton("Retry")
+        refresh.addActionListener(refreshListener);
         button.addActionListener(listener)
 
         actionButtons.add(button, BorderLayout.NORTH)
+        actionButtons.add(refresh, BorderLayout.WEST)
         actionButtons.add(clearChat, BorderLayout.SOUTH)
         actionPanel.add(actionButtons, BorderLayout.EAST)
 
