@@ -140,7 +140,7 @@ class ContentPanelComponent(private val chatBotActionService: ChatBotActionServi
         actionPanel.add(searchTextArea, BorderLayout.CENTER)
 
         val actionButtons = JPanel(BorderLayout())
-        val clearChat = LinkLabel<String>("Clear", null)
+        val clearChat = LinkLabel<String>("Reset", null)
         clearChat.addMouseListener(object : MouseAdapter() {
             override fun mouseClicked(e: MouseEvent?) {
                 myList.removeAll()
